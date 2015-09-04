@@ -1,0 +1,28 @@
+declare copy-namespaces no-preserve,inherit;
+declare namespace ns1="http://tempuri.org/";
+declare namespace ns2="http://www.w3.org/2001/XMLSchema";
+
+<root xmlns:ns2="http://www.w3.org/2001/XMLSchema">{
+  let $nodes := (
+    element ns1:Projects {
+      let $query := "select PROJECT_ID,PROJECT_NAME from /shared/Projects/""UDL-SAIB""/SoapUI/NS_Coding/XQuery/Transformaton()"
+      let $PROJ1 := composite:executeQuery($query)//result
+      for $PROJ in $PROJ1
+      return
+      element ns1:Project {
+        element ns1:ProjectID {$PROJ/PROJECT_ID/text()},
+        element ns1:ProjectName {$PROJ/PROJECT_NAME/text()},
+        let $query := "select PROJECT_ID,CUSTOMER_ID,CUSTOMER_NAME from /shared/Projects/""UDL-SAIB""/SoapUI/NS_Coding/VIews/Cust_View"
+        let $CUST1 := composite:executeQuery($query)//result[PROJECT_ID=$PROJ/PROJECT_ID]
+        for $CUST in $CUST1[PROJECT_ID=$PROJ/PROJECT_ID]
+        return
+        element ns1:Customer {
+          element ns1:CustomerID {$CUST/CUSTOMER_ID/text()},
+          element ns1:CustomerName {$CUST/CUSTOMER_NAME/text()}
+        }
+      }
+    }
+  )
+  return
+  $nodes[1]
+}</root>/ns1:Projects
